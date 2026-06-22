@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0003 — 订单全链路：从下单到售后</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<h1>📋 Lesson 0003：订单——电商最长的链路</h1>
+
+<blockquote>
+如果说商品是骨架、库存是血液，那订单就是<strong>神经系统</strong>——它串联了用户、商品、库存、支付、物流、售后所有环节。<br>
+OMS（订单管理系统）就是这根神经的中枢。
+</blockquote>
+
+<h2>1. 订单到底是什么？</h2>
+
+<p>订单不是一张简单的「谁买了什么」的纸条。它是一个<strong>多维信息聚合体</strong>：</p>
+
+<div class="card">
+  <div class="card-title">📦 一笔订单包含的信息维度</div>
+  <table>
+    <tr><th>维度</th><th>包含什么</th><th>来源系统</th></tr>
+    <tr><td>基本信息</td><td>订单号、来源渠道、下单时间、订单状态</td><td>OMS</td></tr>
+    <tr><td>用户信息</td><td>用户 ID、收货地址、联系方式</td><td>CRM/用户中心</td></tr>
+    <tr><td>商品信息</td><td>SKU、数量、单价、实付金额</td><td>商品中心</td></tr>
+    <tr><td>财务信息</td><td>支付方式、支付流水号、实付/优惠/运费</td><td>支付网关</td></tr>
+    <tr><td>物流信息</td><td>快递公司、运单号、发货仓库</td><td>WMS/物流</td></tr>
+    <tr><td>售后信息</td><td>退款金额、退货状态、退款原因</td><td>售后系统</td></tr>
+  </table>
+</div>
+
+<p style="color:var(--accent)">运营中台的核心价值：当这些维度的数据散落在不同系统时，OMS 负责把它们串在一起，形成一笔完整可追踪的订单。</p>
+
+<h2>2. OMS 是什么？</h2>
+
+<div class="card">
+  <div class="card-title">🏗️ OMS = Order Management System（订单管理系统）</div>
+  <p>OMS 是电商中台的<strong>枢纽系统</strong>，位于销售渠道和履约系统之间：</p>
+
+  <div class="flow" style="justify-content:center; margin:1.5rem 0;">
+    <div class="flow-box">京东</div>
+    <div class="flow-box">天猫</div>
+    <div class="flow-box">官网</div>
+    <div class="flow-box">Amazon</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box" style="border-color:var(--accent); font-size:1.1rem;">🔗 OMS</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">WMS 仓库</div>
+    <div class="flow-box">物流</div>
+    <div class="flow-box">财务</div>
+  </div>
+
+  <p>OMS 的核心职责：</p>
+  <ul>
+    <li><strong>接单</strong>——从各渠道汇集订单，统一格式</li>
+    <li><strong>拆单</strong>——一个订单多个 SKU 可能从不同仓库发货</li>
+    <li><strong>路由</strong>——决定哪个仓库发货最优</li>
+    <li><strong>状态管理</strong>——订单从生到死的状态流转</li>
+    <li><strong>异常处理</strong>——超时未支付、缺货、物流异常</li>
+  </ul>
+</div>
+
+<h2>3. 订单状态机——全链路的核心</h2>
+
+<p>订单在它的生命周期中经历一系列状态变化。<strong>状态机</strong>定义了：当前状态 + 触发事件 → 下一状态。</p>
+
+<h3>3.1 正向流程（正常订单）</h3>
+
+<div class="flow" style="margin:1.5rem 0; font-size:0.85rem;">
+  <div class="flow-box">待支付</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">已支付</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">待发货</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">已发货</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">已签收</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box" style="background:var(--success);">已完成</div>
+</div>
+
+<table>
+  <tr><th>状态</th><th>触发条件</th><th>系统动作</th></tr>
+  <tr><td>1. 待支付</td><td>用户提交订单</td><td>锁定库存（不扣减）、生成订单号、启动支付倒计时</td></tr>
+  <tr><td>2. 已支付</td><td>支付成功回调</td><td>扣减库存（从锁定变为已售）、写入支付流水</td></tr>
+  <tr><td>3. 待发货</td><td>订单审核通过</td><td>推送到 WMS 生成拣货单</td></tr>
+  <tr><td>4. 已发货</td><td>仓库出库扫描</td><td>扣减仓库实物库存、生成运单号、通知用户</td></tr>
+  <tr><td>5. 已签收</td><td>物流签收回调</td><td>启动自动确认收货倒计时</td></tr>
+  <tr><td>6. 已完成</td><td>确认收货/超时自动</td><td>订单关闭、支持评价、计入销售报表</td></tr>
+</table>
+
+<h3>3.2 逆向流程（售后）</h3>
+
+<div class="flow" style="margin:1.5rem 0; font-size:0.85rem;">
+  <div class="flow-box" style="background:var(--warning);">申请退款</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">待审核</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box" style="border: 1px dashed var(--accent);">仅退款</div>
+  <span class="flow-arrow">/</span>
+  <div class="flow-box" style="border: 1px dashed var(--accent-2);">退货退款</div>
+</div>
+
+<div class="card">
+  <div class="card-title">🔀 售后的三种形态</div>
+  <table>
+    <tr><th>类型</th><th>场景</th><th>库存影响</th></tr>
+    <tr><td><strong>仅退款</strong></td><td>未发货取消、质量问题补偿</td><td>释放锁定→可售+1</td></tr>
+    <tr><td><strong>退货退款</strong></td><td>已发货后退货</td><td>退回入库→可售+1</td></tr>
+    <tr><td><strong>换货</strong></td><td>发错/损坏换新</td><td>换出-1, 换回+1（本质是两笔订单）</td></tr>
+  </table>
+</div>
+
+<h2>4. 订单如何影响库存？——关键时刻</h2>
+
+<p>订单状态的每一次变化，都会触发库存操作。这就是为什么「库存对账」是运营日常：</p>
+
+<table>
+  <tr><th>时机</th><th>库存动作</th><th>数值变化</th></tr>
+  <tr><td>下单</td><td><strong>锁定</strong>（预占）</td><td>可售 −1，锁定 +1</td></tr>
+  <tr><td>支付成功</td><td><strong>扣减</strong>（确认）</td><td>锁定 −1，已售 +1</td></tr>
+  <tr><td>支付超时</td><td><strong>释放</strong>（回滚）</td><td>锁定 −1，可售 +1</td></tr>
+  <tr><td>发货出库</td><td><strong>实物出库</strong></td><td>仓库库存 −1</td></tr>
+  <tr><td>退货入库</td><td><strong>实物入库</strong></td><td>仓库库存 +1</td></tr>
+</table>
+
+<div class="card">
+  <div class="card-title">⚠️ 高频坑位：超卖</div>
+  <p><strong>超卖</strong> = 卖出的数量 > 实际库存。</p>
+  <p>根源通常是：下单时只锁了库存但没有实时扣减，多个并发请求穿过了锁定逻辑。</p>
+  <p style="color:var(--accent)">运营排查步骤：确认库存扣减时机 → 检查是否有并发订单同一秒下单 → 看支付回调和库存扣减的先后顺序。</p>
+</div>
+
+<h2>5. 拆单——OMS 的核心能力</h2>
+
+<p>一笔用户订单，为什么可能变成多笔仓库订单？</p>
+
+<div class="example-box">
+<h4>🎬 场景</h4>
+<p>用户在 Insta360 官网下单：<br>
+• X5 相机（黑色 128GB）— 深圳仓有货<br>
+• 自拍杆 — 深圳仓无货，义乌仓有货<br>
+• 保护壳 — 预售，7 天后到货</p>
+</div>
+
+<p>OMS 的拆单逻辑：</p>
+
+<table>
+  <tr><th>子订单</th><th>商品</th><th>发货仓</th><th>状态</th></tr>
+  <tr><td>子订单-1</td><td>X5 相机</td><td>深圳仓</td><td>正常发货</td></tr>
+  <tr><td>子订单-2</td><td>自拍杆</td><td>义乌仓</td><td>正常发货</td></tr>
+  <tr><td>子订单-3</td><td>保护壳</td><td>待定</td><td>预售锁定</td></tr>
+</table>
+
+<p>对运营的启示：<strong>看销售报表时，注意拆单后的数据口径</strong>——原始订单金额 vs 子订单金额，退款要拆到子订单维度。</p>
+
+<h2>6. 测验</h2>
+
+<div class="quiz">
+  <h3>🧠 第 1 题</h3>
+  <p>用户下单后未支付，5 分钟后订单超时自动取消。此时库存发生了什么？</p>
+
+  <a class="quiz-option" href="#q1-a">A. 库存不变，因为没付款</a>
+  <a class="quiz-option" href="#q1-b">B. 锁定库存释放，可售 +1</a>
+  <a class="quiz-option" href="#q1-c">C. 所有库存都被扣掉了</a>
+  <a class="quiz-option" href="#q1-d">D. 可售库存 −1，已售 +1</a>
+
+  <div id="q1-a" class="quiz-reveal incorrect">
+    ❌ 不对。下单时已经锁了库存，取消时必须释放。
+  </div>
+  <div id="q1-b" class="quiz-reveal correct">
+    ✅ <strong>正确！</strong>下单时锁定库存（可售−1，锁定+1）。超时取消→释放锁定（锁定−1，可售+1）。<br>
+    <span style="color:var(--text-muted)">这就是为什么超时取消不会导致「消失的库存」。</span>
+  </div>
+  <div id="q1-c" class="quiz-reveal incorrect">
+    ❌ 不对。下单不是直接扣库存，是锁定。取消不是扣更多。
+  </div>
+  <div id="q1-d" class="quiz-reveal incorrect">
+    ❌ 不对。可售−1 是下单时的动作，已售+1 是支付后的动作。取消不涉及已售。
+  </div>
+</div>
+
+<div class="quiz">
+  <h3>🧠 第 2 题</h3>
+  <p>运营接到投诉：「我买了 3 件东西，收到了 2 个包裹，还有一个没到」。你怎么排查？</p>
+
+  <a class="quiz-option" href="#q2-a">A. 直接让仓库补发</a>
+  <a class="quiz-option" href="#q2-b">B. 先在 OMS 查订单是否被拆单</a>
+  <a class="quiz-option" href="#q2-c">C. 检查物流单号</a>
+  <a class="quiz-option" href="#q2-d">D. 先退款再查原因</a>
+
+  <div id="q2-a" class="quiz-reveal incorrect">
+    ❌ 不是最优。先搞清楚第三件在哪，避免重复发货。
+  </div>
+  <div id="q2-b" class="quiz-reveal correct">
+    ✅ <strong>正确！</strong>第一步永远是查 OMS 子订单。<br>
+    3 件商品 → 可能拆成 2-3 个子订单 → 每个子订单有独立物流单号。<br>
+    找到第三个子订单的单号，问题就定位了。
+  </div>
+  <div id="q2-c" class="quiz-reveal incorrect">
+    ❌ 查了，但可能只有 2 个运单号。你不知道第三个在哪。
+  </div>
+  <div id="q2-d" class="quiz-reveal incorrect">
+    ❌ 用户体验最差。先定位问题再决定补偿策略。
+  </div>
+</div>
+
+<h2>7. 关键要点</h2>
+
+<table>
+  <tr><th>#</th><th>Takeaway</th></tr>
+  <tr><td>1</td><td>订单是<strong>多维信息聚合体</strong>，OMS 是所有维度的枢纽</td></tr>
+  <tr><td>2</td><td>订单状态机：待支付→已支付→待发货→已发货→已签收→已完成</td></tr>
+  <tr><td>3</td><td>库存三态：<strong>可售 → 锁定 → 已售</strong>（下单锁、支付扣、超时放）</td></tr>
+  <tr><td>4</td><td>超卖的根源：并发下单穿透锁定逻辑</td></tr>
+  <tr><td>5</td><td>拆单是 OMS 核心能力：按仓库/预售状态自动拆分子订单</td></tr>
+  <tr><td>6</td><td>排查订单问题第一步：<strong>在 OMS 看子订单结构</strong></td></tr>
+</table>
+
+<h2>8. 延伸阅读</h2>
+<ul>
+  <li><a href="https://www.youzan.com/cms/article/77338.html" target="_blank">有赞：电商订单业务流程图详解</a> — 用户维度+系统维度双视角</li>
+  <li><a href="https://www.woshipm.com/share/6040351.html" target="_blank">人人都是产品经理：OMS 系统设计指南</a> — 完整字段和流转</li>
+  <li><a href="https://www.woshipm.com/pd/1055272.html" target="_blank">电商订单系统设计的 3 个方面</a> — 状态机详解</li>
+</ul>
+
+<div class="footnote">
+  <p>Lesson 0003 · 电商运营中台知识体系<br>
+  前两课：<a href="0001-spu-sku-category.html">SPU/SKU/类目</a> · <a href="0002-inventory-basics.html">库存基础</a><br>
+  有任何疑问随时在对话中问我。</p>
+</div>
+
+<div class="nav">
+  <a href="0002-inventory-basics.html">← Lesson 0002：库存基础</a>
+  <a href="0004-channels.html">下一课：渠道管理 →</a>
+</div>
+
+</body>
+</html>
