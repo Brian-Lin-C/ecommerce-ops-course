@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0005 — 销售核心指标：GMV、转化率、客单价</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<h1>📈 Lesson 0005：销售核心指标——用数字读懂电商</h1>
+
+<blockquote>
+电商不看感觉，只看数据。面试被问「GMV 下降了怎么办」——<br>
+不会拆解指标的人答「加大推广」，会拆解的人从 6 个维度逐一排查。
+</blockquote>
+
+<h2>1. 零售万能公式</h2>
+
+<div class="card">
+  <div class="card-title">📐 电商第一公式</div>
+  <pre><code>GMV = 流量 × 转化率 × 客单价 + 复购贡献
+
+拆开看：
+GMV = PV × CTR × CVR × ASP + Repeat</code></pre>
+  <p style="margin-top:0.8rem">这个公式的意思是：任何一个 GMV 问题，都能追溯到四个因子之一。<br>
+<strong>运营的核心能力：不看总数，看因子。</strong></p>
+</div>
+
+<h2>2. 六大核心指标</h2>
+
+<h3>2.1 GMV（Gross Merchandise Volume）</h3>
+
+<div class="card">
+  <div class="card-title">📐 商品交易总额</div>
+  <pre><code>GMV = 销售额 + 取消订单金额 + 退款金额 + 拒收金额</code></pre>
+  <p><strong>注意：</strong>GMV 是「拍下」的口径，不是「实收」。包括了后来取消和退款的订单。</p>
+  <p style="color:var(--accent)">面试重点：GMV 虚高怎么办？——要同时看「实收 = GMV − 退款 − 取消」。</p>
+</div>
+
+<h3>2.2 转化率（CVR — Conversion Rate）</h3>
+
+<div class="card">
+  <div class="card-title">📐 衡量「流量变钱」的效率</div>
+  <pre><code>CVR = 成交订单数 ÷ 访客数（UV）
+
+细分指标：
+- 点击转化率：点击进入商品详情 ÷ 曝光
+- 下单转化率：下单 ÷ 访客
+- 支付转化率：支付成功 ÷ 下单</code></pre>
+</div>
+
+<h3>2.3 客单价（ASP / AOV）</h3>
+
+<div class="card">
+  <div class="card-title">📐 每笔订单平均金额</div>
+  <pre><code>客单价 = 总销售额 ÷ 有效订单数</code></pre>
+  <p>提升客单价的手段：关联推荐、满减、捆绑销售、配件搭售。</p>
+  <p style="color:var(--text-muted)">Insta360 场景：买相机推自拍杆+保护壳+存储卡 = 配件收入拉高客单价 20-40%。</p>
+</div>
+
+<h3>2.4 退货率</h3>
+
+<div class="card">
+  <div class="card-title">📐 衡量商品满意度和运营质量</div>
+  <pre><code>退货率 = 退货数量 ÷ 销售数量</code></pre>
+  <p>消费电子正常范围：<strong>2-5%</strong>。高于 8% 需要排查原因。</p>
+  <p>退货率高的常见原因：描述不符、质量问题、预期落差、竞品降价。</p>
+</div>
+
+<h3>2.5 毛利率</h3>
+
+<div class="card">
+  <div class="card-title">📐 衡量赚钱能力</div>
+  <pre><code>毛利率 = (收入 − 商品成本) ÷ 收入 × 100%
+
+净利率 = (收入 − 全部成本) ÷ 收入
+全部成本 = 商品成本 + 平台佣金 + 物流 + 推广 + 人工</code></pre>
+</div>
+
+<h3>2.6 ROI（投入产出比）</h3>
+
+<div class="card">
+  <div class="card-title">📐 衡量每一分钱花得值不值</div>
+  <pre><code>ROI = 利润 ÷ 投入成本
+
+广告 ROI = 广告带来的销售额 ÷ 广告花费
+库存 ROI = 销售利润 ÷ 平均库存成本</code></pre>
+  <p style="color:var(--text-muted)">ROI = 1 是不赚不赔，ROI = 3 是行业公认健康线。</p>
+</div>
+
+<h2>3. GMV 下降怎么拆解——面试必考题</h2>
+
+<div class="card">
+  <div class="card-title">🔍 六步拆解法</div>
+
+  <p><strong>第一步：确认口径</strong>——是不是同一个 GMV 定义？含不含退款？环比还是同比？</p>
+
+  <p><strong>第二步：拆渠道</strong>——哪个渠道下降？官网？天猫？Amazon？京东？</p>
+
+  <p><strong>第三步：拆流量因子</strong></p>
+  <pre><code>曝光量 ↓ ？ → SEO/广告投放/平台活动减少
+点击率 ↓ ？ → 主图/标题/价格/评价出了问题
+访客数 ↓ ？ → 渠道流量整体下降</code></pre>
+
+  <p><strong>第四步：拆转化因子</strong></p>
+  <pre><code>下单转化 ↓ ？ → 详情页/价格/促销/库存显示
+支付转化 ↓ ？ → 支付流程/库存不足/风控拦截</code></pre>
+
+  <p><strong>第五步：拆商品</strong>——哪个 SPU/SKU 的 GMV 下降？是新品乏力还是爆款衰减？</p>
+
+  <p><strong>第六步：拆客单价</strong>——是成交件数少了还是单价低了？是因为促销折让还是产品结构下移？</p>
+</div>
+
+<div class="example-box">
+<h4>🎬 模拟面试回答</h4>
+<p><strong>面试官：</strong>「上个月 GMV 环比下降 15%，你怎么办？」</p>
+<p><strong>好的回答：</strong></p>
+<ol>
+  <li>先确认 GMV 口径和退款因素——如果退款率从 3% 涨到 6%，实际净收可能只降了 6%。</li>
+  <li>拆到渠道：发现 Amazon 降 30%，天猫涨 5%。问题锁定在 Amazon。</li>
+  <li>再拆 Amazon：访客没变，转化率从 4% 掉到 2.5%。</li>
+  <li>定位到转化率：发现竞品降价 + 店铺出现了 3 条差评。</li>
+  <li>行动：优化详情页对比竞品 + 联系差评用户补偿 + 短期促销恢复转化。</li>
+</ol>
+</div>
+
+<h2>4. 指标体系全貌</h2>
+
+<div class="card">
+  <div class="card-title">🏗️ 电商运营指标体系（阿里八大类）</div>
+  <table>
+    <tr><th>类别</th><th>核心指标</th><th>用途</th></tr>
+    <tr><td>总体运营</td><td>GMV、实收、毛利率、净利</td><td>老板看</td></tr>
+    <tr><td>流量</td><td>PV、UV、CTR、跳出率</td><td>运营/投放看</td></tr>
+    <tr><td>销售转化</td><td>CVR、客单价、连带率</td><td>运营看</td></tr>
+    <tr><td>客户价值</td><td>复购率、LTV、RFM</td><td>CRM 看</td></tr>
+    <tr><td>商品</td><td>动销率、售罄率、周转天数</td><td>商品运营看</td></tr>
+    <tr><td>营销活动</td><td>活动 ROI、拉新成本、券核销率</td><td>市场看</td></tr>
+    <tr><td>风险控制</td><td>退货率、投诉率、异常订单</td><td>风控/客服看</td></tr>
+    <tr><td>市场竞争</td><td>市场份额、价格指数、排名</td><td>战略看</td></tr>
+  </table>
+</div>
+
+<h2>5. 测验</h2>
+
+<div class="quiz">
+  <h3>🧠 GMV 拆解实战</h3>
+  <p>某渠道：上月 GMV ¥1,000,000，UV 50,000，CVR 4%，客单价 ¥500。<br>
+  本月 UV 不变，CVR 降到 3%，客单价涨到 ¥550。<br>
+  <strong>本月 GMV 是多少？问题出在哪？</strong></p>
+
+  <a class="quiz-option" href="#q1-a">A. ¥750,000，CVR 下降是主因</a>
+  <a class="quiz-option" href="#q1-b">B. ¥825,000，CVR 下降但客单价部分对冲</a>
+  <a class="quiz-option" href="#q1-c">C. ¥1,100,000，客单价提升带动增长</a>
+
+  <div id="q1-a" class="quiz-reveal incorrect">
+    ❌ 计算不对。GMV = 50,000 × 3% × 550 = 50,000 × 0.03 × 550 = 825,000。
+  </div>
+  <div id="q1-b" class="quiz-reveal correct">
+    ✅ <strong>正确。</strong>GMV = 50,000 × 3% × 550 = <strong>¥825,000</strong>（降 17.5%）<br>
+    CVR 下降 25% 被客单价上升 10% 部分对冲，但总体仍降。<br>
+    运营重点：优先排查转化率下降的根因——详情页？竞品？差评？
+  </div>
+  <div id="q1-c" class="quiz-reveal incorrect">
+    ❌ 不对。虽然客单价升了，但 CVR 降的冲击更大。实际 GMV 下降。
+  </div>
+</div>
+
+<h2>6. 关键要点</h2>
+
+<table>
+  <tr><th>#</th><th>Takeaway</th></tr>
+  <tr><td>1</td><td>GMV = 流量 × 转化率 × 客单价 + 复购</td></tr>
+  <tr><td>2</td><td>GMV 下降 ≠ 不知道怎么办，拆成 6 步逐个排查</td></tr>
+  <tr><td>3</td><td>GMV 是「拍下」口径，实收 = GMV − 退款 − 取消</td></tr>
+  <tr><td>4</td><td>每个指标都有行业基准：CVR 2-5%、退货率 2-5%、ROI ≥ 3</td></tr>
+  <tr><td>5</td><td>面试黄金法则：先确认口径和退款，再拆渠道，最后拆因子</td></tr>
+</table>
+
+<h2>7. 延伸阅读</h2>
+<ul>
+  <li><a href="https://developer.aliyun.com/article/238565" target="_blank">阿里云：电商数据分析基础指标体系</a> — 八大类指标完整版</li>
+  <li><a href="https://www.hwds868.com/article/ecommerce-operation-six-core-data-metrics-guide.html" target="_blank">电商运营六大核心指标与优化</a> — 实操优化方法</li>
+</ul>
+
+<div class="footnote">
+  <p>Lesson 0005 · 电商运营中台知识体系<br>
+  前面：<a href="0004-channels.html">渠道管理</a><br>
+  有任何疑问随时在对话中问我。</p>
+</div>
+
+<div class="nav">
+  <a href="0004-channels.html">← Lesson 0004：渠道管理</a>
+  <a href="0006-dashboards-reconciliation.html">下一课：数据看板与对账 →</a>
+</div>
+
+</body>
+</html>
