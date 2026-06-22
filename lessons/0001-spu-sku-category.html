@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0001 — 电商核心实体：商品、SPU、SKU、类目</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<h1>📦 Lesson 0001：电商运营的第一块砖——商品、SPU、SKU、类目</h1>
+
+<blockquote>
+如果你只能理解电商的三个概念，那应该是：类目、SPU、SKU。<br>
+所有库存、订单、销售分析、数据看板，都建立在这三个概念之上。
+</blockquote>
+
+<h2>1. 从一个真实问题开始</h2>
+
+<p>假设你在 Insta360 的商品管理后台，需要录入一款新产品：</p>
+
+<div class="example-box">
+<h4>🎬 场景</h4>
+<p>Insta360 发布了新款全景相机 <strong>X5</strong>，有两个颜色（黑/白），三个存储规格（64GB/128GB/256GB），在官网、Amazon、京东三个渠道销售。</p>
+<p><strong>问题：后台系统里应该创建几个「商品」？几个「SKU」？</strong></p>
+</div>
+
+<p>如果你的答案是「1 个商品，18 个 SKU」或「3 个商品」——恭喜你已经踩到了电商系统设计最核心的坑：<strong>不同角色看到的「商品」不是同一个东西</strong>。</p>
+
+<h2>2. 三层模型：类目 → SPU → SKU</h2>
+
+<p>电商中台商品体系的标准分层（来源：阿里/京东中台架构实践）：</p>
+
+<div class="flow">
+  <div class="flow-box">📁 类目 Category</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">📋 SPU</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">📦 SKU</div>
+</div>
+
+<h3>2.1 类目（Category）——商品的「书架」</h3>
+
+<p>类目是商品的分类体系，决定了商品在哪个货架上被用户找到。</p>
+
+<div class="card">
+  <div class="card-title">🏪 类目层级示例（消费电子品牌）</div>
+  <pre><code>电子数码
+  └─ 摄影摄像
+       └─ 运动相机          ← Insta360 主品类
+       └─ 全景相机
+       └─ 配件
+            └─ 自拍杆
+            └─ 保护壳
+            └─ 镜头保护镜</code></pre>
+</div>
+
+<p><strong>为什么类目重要？</strong></p>
+<ul>
+  <li>前端导航和搜索依赖类目树</li>
+  <li>不同类目可以有<strong>不同的属性模板</strong>（相机有「像素」「光圈」，衣服有「尺码」「面料」）</li>
+  <li>销售报表按类目汇总：哪个品类贡献最多 GMV？</li>
+  <li>渠道铺货规则：「配件类目只铺京东和官网，不上 Amazon」</li>
+</ul>
+
+<h2>3. SPU vs SKU —— 电商最核心的区分</h2>
+
+<div class="compare-grid">
+  <div class="compare-col">
+    <h3>SPU</h3>
+    <p><span class="highlight">Standard Product Unit</span><br>标准化产品单元</p>
+    <p style="margin-top:0.8rem"><strong>是什么：</strong>一组<em>共用属性</em>相同的商品集合</p>
+    <p><strong>谁关心：</strong>平台运营、搜索、推荐</p>
+    <p><strong>例子：</strong>「Insta360 X5」是一个 SPU</p>
+    <p><strong>变与不变：</strong>品牌、型号、系列等<em>共性属性</em>不变</p>
+  </div>
+  <div class="compare-col">
+    <h3>SKU</h3>
+    <p><span class="highlight">Stock Keeping Unit</span><br>库存量单位</p>
+    <p style="margin-top:0.8rem"><strong>是什么：</strong>库存进出计量的<em>最小单位</em></p>
+    <p><strong>谁关心：</strong>仓库、采购、财务</p>
+    <p><strong>例子：</strong>「Insta360 X5 黑色 128GB」是一个 SKU</p>
+    <p><strong>变与不变：</strong>颜色、容量、尺码等<em>销售属性</em>可变</p>
+  </div>
+</div>
+
+<h3>3.1 一张表看懂关系</h3>
+
+<table>
+  <tr>
+    <th>维度</th>
+    <th>SPU</th>
+    <th>SKU</th>
+  </tr>
+  <tr>
+    <td>全称</td>
+    <td>Standard Product Unit</td>
+    <td>Stock Keeping Unit</td>
+  </tr>
+  <tr>
+    <td>中文</td>
+    <td>标准化产品单元</td>
+    <td>库存量单位</td>
+  </tr>
+  <tr>
+    <td>粒度</td>
+    <td>粗（聚合）</td>
+    <td>细（原子）</td>
+  </tr>
+  <tr>
+    <td>数量关系</td>
+    <td>1 个 SPU</td>
+    <td>下面 N 个 SKU</td>
+  </tr>
+  <tr>
+    <td>价格</td>
+    <td>区间价（¥2,999-3,999）</td>
+    <td>精确价（¥2,999）</td>
+  </tr>
+  <tr>
+    <td>库存</td>
+    <td>不关心</td>
+    <td>每个 SKU 有独立库存数</td>
+  </tr>
+  <tr>
+    <td>条形码</td>
+    <td>无</td>
+    <td>每个 SKU 有唯一条形码</td>
+  </tr>
+</table>
+
+<h3>3.2 回到开头的问题</h3>
+
+<div class="card">
+  <div class="card-title">✅ 正确答案</div>
+  <p><strong>1 个 SPU</strong>：Insta360 X5<br>
+  <strong>6 个 SKU</strong>：颜色(2) × 规格(3) = 6</p>
+  <p style="margin-top:0.8rem; color:var(--text-muted)">渠道（官网/Amazon/京东）不产生新 SKU，只是在每个渠道上架同样的 6 个 SKU。<br>
+  渠道 x SKU 的铺货关系 = <strong>6 × 3 = 18 条铺货记录</strong>，但不是 18 个 SKU。</p>
+</div>
+
+<h2>4. 为什么会有「ID」和「货品」？</h2>
+
+<p>在实际中台系统中，你还会遇到两个概念：</p>
+
+<div class="card">
+  <div class="card-title">🏷️ Item / 货品</div>
+  <p>SKU 的<strong>仓库视角</strong>版本。同一个 SKU 在不同仓库有不同库存数量，仓库管理的是「货品」而非「商品」。</p>
+  <p style="color:var(--text-muted)">商品（销售视角）：标题、图片、售价、描述 → 给消费者看<br>
+  货品（仓储视角）：重量、体积、批次号、保质期 → 给仓库看</p>
+</div>
+
+<div class="card">
+  <div class="card-title">🆔 ID 体系</div>
+  <pre><code>spu_id:     "SPU20240001"    ← 一个 SPU 一个 ID
+sku_id:     "SKU20240001001"  ← 每个 SKU 一个 ID  
+item_id:    "ITEM-WH01-001"   ← 仓库维度的货品 ID
+channel_id: "AMAZON_US"       ← 渠道标识</code></pre>
+  <p style="margin-top:0.8rem">运营中台的所有业务（库存、订单、销售分析）都靠这些 ID 串联。排查数据异常时，<strong>第一步永远是先确认 ID 层面的关联关系是否正确</strong>。</p>
+</div>
+
+<h2>5. 测验</h2>
+
+<div class="quiz">
+  <h3>🧠 自我检测</h3>
+  <p>Nike 在售一款跑鞋 Air Zoom，有 3 个颜色（黑白蓝）、5 个尺码（39-43），在天猫和京东两个渠道销售。<br>
+  请问：几个 SPU？几个 SKU？</p>
+
+  <a class="quiz-option" href="#q1-a">A. 2 个 SPU，15 个 SKU</a>
+  <a class="quiz-option" href="#q1-b">B. 1 个 SPU，15 个 SKU</a>
+  <a class="quiz-option" href="#q1-c">C. 1 个 SPU，30 个 SKU</a>
+  <a class="quiz-option" href="#q1-d">D. 2 个 SPU，30 个 SKU</a>
+
+  <div id="q1-a" class="quiz-reveal incorrect">
+    ❌ 不对。「天猫」和「京东」是渠道，不是 SPU。SPU 是产品维度的。
+  </div>
+  <div id="q1-b" class="quiz-reveal correct">
+    ✅ <strong>正确！</strong>1 个 SPU（Nike Air Zoom），15 个 SKU（3色 × 5码）。渠道不产生新 SKU，只是铺货关系。
+  </div>
+  <div id="q1-c" class="quiz-reveal incorrect">
+    ❌ 不对。渠道不是 SKU 的乘数因子。30 = 3×5×2，但渠道是铺货维度，不是库存维度。
+  </div>
+  <div id="q1-d" class="quiz-reveal incorrect">
+    ❌ 不对。SPU 只有一个（同一款鞋），渠道不产生新 SPU。
+  </div>
+</div>
+
+<h2>6. 关键要点</h2>
+
+<table>
+  <tr>
+    <th>#</th>
+    <th>Takeaway</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>电商商品体系三层：<strong>类目（组织）→ SPU（聚合）→ SKU（原子）</strong></td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>SPU 管「是什么产品」，SKU 管「哪一个具体规格」</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>库存、价格、条形码绑定在 SKU 层面，不在 SPU</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>渠道铺货 ≠ 新 SKU。渠道 × SKU = 铺货记录</td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td>「商品」和「货品」是两个视角——前台销售 vs 后台仓储</td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td>排查问题第一步：确认 ID 体系的关联关系</td>
+  </tr>
+</table>
+
+<h2>7. 延伸阅读</h2>
+<ul>
+  <li><a href="https://developer.volcengine.com/articles/7538285654846832659" target="_blank">火山引擎：SPU、商品、SKU 概念模型设计</a> — 深入的商品模型架构</li>
+  <li><a href="https://www.woshipm.com/pd/5708781.html" target="_blank">人人都是产品经理：中台实战之商品服务中心设计</a> — 类目树、品牌库、属性库的全貌</li>
+</ul>
+
+<div class="footnote">
+  <p>Lesson 0001 · 电商运营中台知识体系<br>
+  有任何疑问，在对话中问我——我随时可以解释、举例或补充。</p>
+</div>
+
+<div class="nav">
+  <span></span>
+  <a href="0002-inventory-basics.html">下一课：库存基础 →</a>
+</div>
+
+</body>
+</html>
