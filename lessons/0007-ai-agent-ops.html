@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0007 — AI Agent 重构电商运营</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<h1>🤖 Lesson 0007：AI Agent 重构电商运营流程</h1>
+
+<blockquote>
+这是 Insta360 岗位的核心差异化——<strong>不是传统运营岗，是用 AI Agent 重构运营</strong>。<br>
+面试中你能清晰讲出 AI Agent 在电商的真实应用场景，就赢了一半。
+</blockquote>
+
+<h2>1. 先搞清楚：AI 工具 vs AI Agent 的区别</h2>
+
+<div class="compare-grid">
+  <div class="compare-col">
+    <h3>🧰 AI 工具</h3>
+    <p><strong>你问，它答。</strong></p>
+    <p>ChatGPT / Claude 对话模式</p>
+    <p>每次需要手动输入</p>
+    <p>例子：「帮我把这段数据做成表格」</p>
+    <p style="color:var(--text-muted)">人驱动，单次执行</p>
+  </div>
+  <div class="compare-col">
+    <h3>🤖 AI Agent</h3>
+    <p><strong>你给目标，它自己去执行。</strong></p>
+    <p>能调用工具、读写文件、搜索、写代码</p>
+    <p>自动规划步骤、检查结果、纠错</p>
+    <p>例子：「每天早上 9 点拉销售数据，生成看板报告，异常自动发钉钉」</p>
+    <p style="color:var(--accent)">目标驱动，自主循环执行</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">🔑 Agent 的四个核心能力</div>
+  <table>
+    <tr><th>能力</th><th>说明</th><th>电商场景</th></tr>
+    <tr><td>📋 <strong>规划</strong></td><td>拆解目标为子任务</td><td>「分析 GMV 下降」→ 自动拆成拉数据→分渠道→找异常→出报告</td></tr>
+    <tr><td>🔧 <strong>调用工具</strong></td><td>执行 SQL、调 API、写文件</td><td>自动查询数据库、调取平台 API、生成 Excel</td></tr>
+    <tr><td>🧠 <strong>推理</strong></td><td>分析数据、判断异常、给出建议</td><td>「这个 SKU 周转天数 85 天，建议清仓促销」</td></tr>
+    <tr><td>🔄 <strong>自纠错</strong></td><td>发现错误后自己修正</td><td>SQL 报错→自己改→重跑→验证→确认</td></tr>
+  </table>
+</div>
+
+<h2>2. AI Agent 在电商运营的 7 大应用场景</h2>
+
+<h3>场景 1：自动化数据看板</h3>
+<div class="card">
+  <p><strong>传统方式：</strong>运营每天手动跑 SQL → 复制到 Excel → 做图表 → 发群</p>
+  <p><strong>Agent 方式：</strong></p>
+  <pre><code>Agent 每天 9:00 自动：
+1. 连接数据库，跑昨日 GMV/订单/库存查询
+2. 对比前日和上周同期，标记异常（环比±20%）
+3. 生成 Markdown 报告 + 自动推送钉钉/飞书/邮件
+4. 附异常指标的下钻分析建议</code></pre>
+  <p style="color:var(--text-muted)">节省时间：30 分钟/天 → 1 分钟/天</p>
+</div>
+
+<h3>场景 2：智能对账</h3>
+<div class="card">
+  <p><strong>传统方式：</strong>下载各平台账单 → Excel VLOOKUP → 逐条核对差异 → 手动标注</p>
+  <p><strong>Agent 方式：</strong></p>
+  <pre><code>Agent 每周一自动：
+1. 调取 OMS 上周订单 + 支付宝/京东/Amazon 结算单
+2. 按订单号匹配，标记差异（金额差 > ¥1）
+3. 对每笔差异自动生成解释：
+   "订单 20240615001 差异 ¥3.20：天猫佣金 0.5% = ¥3.20，正常"
+   "订单 20240615042 差异 ¥128：退款未回写 OMS，需人工确认"
+4. 生成对账报告，差异 > ¥100 的标红推送到钉钉</code></pre>
+</div>
+
+<h3>场景 3：商品信息管理</h3>
+<div class="card">
+  <p><strong>Agent 能做的：</strong></p>
+  <ul>
+    <li>批量生成商品标题/描述（针对不同渠道优化）</li>
+    <li>自动翻译商品信息到多语言（Amazon US/JP/DE）</li>
+    <li>根据竞品分析自动建议定价</li>
+    <li>检查各渠道商品信息一致性——发现「天猫有但京东没有的 SKU」「价格不一致」</li>
+  </ul>
+</div>
+
+<h3>场景 4：库存运营智能预警</h3>
+<div class="card">
+  <pre><code>Agent 实时监控库存，自动：
+1. 计算每个 SKU 的周转天数和消耗速度
+2. 预测断货时间：「X5 黑色 128GB 预计 3 天后断货」
+3. 自动生成补货建议（数量 + 优先级排序）
+4. 检测异常库存波动：「昨天库存突增 200 件，检查是否入库单重复」
+5. 推送到钉钉/企业微信</code></pre>
+</div>
+
+<h3>场景 5：销售异常排查</h3>
+<div class="card">
+  <p><strong>面试重点！</strong>这是运营中台最核心的 AI 应用：</p>
+  <pre><code>运营：「这个 SKU 转化率为什么掉了？」
+↓
+Agent 自动执行：
+1. 拉该 SKU 近 30 天每日转化率趋势
+2. 找出下降时间点
+3. 拉同期数据：价格变动、竞品价格、用户评价、流量来源
+4. 生成分析报告：
+   "转化率 6/15 从 4.2% 降至 2.1%，同期：
+    - 竞品降价 15%
+    - 新增 2 条 1 星差评（关键词：发热、续航）
+    - 详情页未更新
+    建议：①优化详情页对比竞品 ②联系差评用户补偿 ③短期满减促销"</code></pre>
+</div>
+
+<h3>场景 6：运营 SOP 文档自动沉淀</h3>
+<div class="card">
+  <p>Agent 观察运营的操作流程，自动生成标准化文档：</p>
+  <pre><code>运营做了一次「大促库存分配」→ Agent 记录操作步骤 →
+自动生成 SOP 草稿：
+"大促库存分配 SOP v1.0
+ 1. 导出近 30 天各渠道销量
+ 2. 按销量占比分配总库存的 70%
+ 3. 预留 30% 给官网（优先保障品牌体验）
+ 4. 检查各渠道库存上限（不超过仓库容量的 80%）
+ 5. 发送审批 → 执行铺货调整"</code></pre>
+</div>
+
+<h3>场景 7：跨团队协作提效</h3>
+<div class="card">
+  <table>
+    <tr><th>协作场景</th><th>Agent 做什么</th></tr>
+    <tr><td>运营→产品</td><td>自动将运营需求整理成结构化 PRD 初稿</td></tr>
+    <tr><td>运营→技术</td><td>将数据异常描述自动转化为排查步骤和 SQL</td></tr>
+    <tr><td>运营→财务</td><td>自动生成月度对账摘要和差异说明</td></tr>
+    <tr><td>运营→客服</td><td>从高频售后问题中自动生成 FAQ 和话术</td></tr>
+    <tr><td>运营→新人</td><td>自动根据操作记录生成培训手册</td></tr>
+  </table>
+</div>
+
+<h2>3. 你进 Insta360 后能怎么用——给面试准备的回答</h2>
+
+<div class="card">
+  <div class="card-title">🎤 面试时你可以这样说</div>
+  <blockquote style="font-style:normal; color:var(--text);">
+    <p>「我理解的 AI Agent 不是简单的 ChatGPT 问答，而是能自主拆解任务、调用工具、分析数据、自我纠错的智能体。</p>
+    <p>在电商运营中台，我看到了几个高价值场景：</p>
+    <p><strong>第一，看板自动化</strong>——用 Agent 每天自动拉数据、生成报告、推送异常，把运营从重复劳动中解放出来。</p>
+    <p><strong>第二，异常排查加速</strong>——GMV 下降时 Agent 自动分渠道分因子分析，1 分钟内出诊断报告，比人工查 30 分钟效率高得多。</p>
+    <p><strong>第三，对账提效</strong>——Agent 自动匹配订单和账单，标记差异，生成解释，人工只需要复核异常项。</p>
+    <p><strong>第四，SOP 沉淀</strong>——让 Agent 观察运营操作，自动生成标准化文档，把个人经验变成团队资产。</p>
+    <p>我已经在用 Claude/Codex 做类似的自动化尝试，我有 Python 和 SQL 基础，可以快速部署这些 Agent。」</p>
+  </blockquote>
+</div>
+
+<h2>4. 测验</h2>
+
+<div class="quiz">
+  <h3>🧠 AI 工具 vs AI Agent</h3>
+  <p>以下哪个是 AI Agent 的应用，而不是普通 AI 工具？</p>
+
+  <a class="quiz-option" href="#q1-a">A. 用 ChatGPT 翻译一段商品描述</a>
+  <a class="quiz-option" href="#q1-b">B. Agent 每天自动拉销售数据、分析异常、生成报告并推送到钉钉</a>
+  <a class="quiz-option" href="#q1-c">C. 让 Codex 写一个 SQL 查询</a>
+  <a class="quiz-option" href="#q1-d">D. 用 Cursor 自动补全代码</a>
+
+  <div id="q1-a" class="quiz-reveal incorrect">
+    ❌ 这是典型的 AI 工具——单次问答，人驱动。
+  </div>
+  <div id="q1-b" class="quiz-reveal correct">
+    ✅ <strong>正确！</strong>定时自动执行、多步骤规划、调用多个工具、生成报告并推送——这是 Agent 的四个核心能力。
+  </div>
+  <div id="q1-c" class="quiz-reveal incorrect">
+    ❌ 单次代码生成是 AI 工具。但如果 Agent 自己决定什么时候写 SQL、写什么 SQL、跑完后再分析结果——那就是 Agent。
+  </div>
+  <div id="q1-d" class="quiz-reveal incorrect">
+    ❌ 自动补全是 IDE 功能，属于 AI 辅助工具。
+  </div>
+</div>
+
+<h2>5. 关键要点</h2>
+
+<table>
+  <tr><th>#</th><th>Takeaway</th></tr>
+  <tr><td>1</td><td>AI 工具 = 你问它答；AI Agent = 给目标，它自己规划+执行+纠错</td></tr>
+  <tr><td>2</td><td>Agent 四大能力：规划、调用工具、推理、自纠错</td></tr>
+  <tr><td>3</td><td>7 大电商场景：看板/对账/商品/库存/排查/SOP/协作</td></tr>
+  <tr><td>4</td><td>核心价值：从「人做重复劳动」变成「人审核 Agent 的输出」</td></tr>
+  <tr><td>5</td><td>面试要说清：具体场景 + 传统方式对比 + Agent 方式 + 价值量化</td></tr>
+</table>
+
+<h2>6. 延伸阅读</h2>
+<ul>
+  <li><a href="https://www.betteryeah.com/blog/best-practices-for-7-agent-applications-in-e-commerce-platforms" target="_blank">BetterYeah：电商平台 Agent 7 大场景解析</a> — 行业实践案例</li>
+  <li><a href="https://aws.amazon.com/cn/blogs/china/e-commerce-intelligent-operation-insight-automation-generation-solution/" target="_blank">AWS：电商智能运营洞察自动化方案</a> — 技术架构参考</li>
+</ul>
+
+<div class="footnote">
+  <p>Lesson 0007 · 电商运营中台知识体系（最后一课）<br>
+  完整课程到此结束。返回 <a href="0001-spu-sku-category.html">第一课</a> 复习。<br>
+  有任何疑问随时在对话中问我。</p>
+</div>
+
+<div class="nav">
+  <a href="0006-dashboards-reconciliation.html">← Lesson 0006：数据看板与对账</a>
+  <span>🏁 课程结束</span>
+</div>
+
+</body>
+</html>
