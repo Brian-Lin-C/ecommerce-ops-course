@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0004 — 渠道管理：官网、平台、分销</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<h1>🌐 Lesson 0004：渠道管理——商品从哪里卖出去</h1>
+
+<blockquote>
+前面三课讲了商品、库存、订单。现在的问题是：<strong>这些商品通过哪些渠道卖给谁？</strong><br>
+渠道决定了定价、库存分配、结算方式和对账口径。渠道管不好，前面的都白搭。
+</blockquote>
+
+<h2>1. 电商渠道的三类形态</h2>
+
+<table>
+  <tr><th>渠道类型</th><th>代表</th><th>特点</th><th>佣金/费用</th></tr>
+  <tr>
+    <td><strong>品牌官网</strong></td>
+    <td>insta360.com</td>
+    <td>自主可控，毛利最高，流量靠自己</td>
+    <td>无佣金，但需承担建站+推广成本</td>
+  </tr>
+  <tr>
+    <td><strong>第三方平台</strong></td>
+    <td>天猫、京东、Amazon、Shopee</td>
+    <td>流量大，规则多，受平台制约</td>
+    <td>佣金 5-15% + 广告费</td>
+  </tr>
+  <tr>
+    <td><strong>分销/批发</strong></td>
+    <td>经销商、B2B 平台</td>
+    <td>走量为主，定价权力低</td>
+    <td>批发折扣 + 返点</td>
+  </tr>
+</table>
+
+<div class="card">
+  <div class="card-title">Insta360 的典型渠道组合</div>
+  <p>官网（品牌旗舰）+ Amazon（海外主力）+ 京东/天猫（国内主力）+ 线下经销商（全球）</p>
+  <p style="color:var(--text-muted)">这就是「全球电商业务」在渠道层面的真实画像。</p>
+</div>
+
+<h2>2. 铺货：同一个 SKU 如何上到不同渠道</h2>
+
+<p>铺货 ≠ 创建新 SKU。铺货是在已有 SKU 的基础上，为每个渠道生成一条<strong>铺货记录</strong>：</p>
+
+<div class="card">
+  <div class="card-title">📋 铺货记录的核心字段</div>
+  <pre><code>{
+  "sku_id":      "SKU20240001001",     // 引用已有 SKU
+  "channel":     "JD",                  // 京东
+  "channel_sku": "JD-X5-BLACK-128",     // 渠道侧的商品编码
+  "price":       2999,                  // 渠道售价
+  "stock_ratio": 0.3,                   // 分配 30% 库存给这个渠道
+  "status":      "on_shelf"             // 上架/下架
+}</code></pre>
+</div>
+
+<div class="example-box">
+<h4>🎬 例子</h4>
+<p>Insta360 X5 黑色 128GB 在深圳仓有 100 件库存。<br>
+渠道库存分配：</p>
+<ul>
+  <li>官网：50 件（优先保障品牌体验）</li>
+  <li>京东：30 件</li>
+  <li>Amazon US：20 件</li>
+</ul>
+<p>这不是 3 个 SKU，是<strong>1 个 SKU × 3 条铺货记录</strong>。</p>
+</div>
+
+<h2>3. 渠道定价策略</h2>
+
+<div class="compare-grid">
+  <div class="compare-col">
+    <h3>统一定价</h3>
+    <p>所有渠道同价</p>
+    <p style="color:var(--success)">✅ 品牌形象统一</p>
+    <p style="color:var(--accent)">❌ 平台促销难配合</p>
+    <p>适合：高端品牌</p>
+  </div>
+  <div class="compare-col">
+    <h3>差异化定价</h3>
+    <p>各渠道不同价</p>
+    <p style="color:var(--success)">✅ 灵活配合平台活动</p>
+    <p style="color:var(--accent)">❌ 串货/比价风险</p>
+    <p>适合：多市场多币种</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">⚠️ 渠道运营的经典坑：窜货</div>
+  <p><strong>窜货</strong>：经销商把 A 渠道的低价货拿到 B 渠道卖，破坏价格体系。</p>
+  <p>防范手段：渠道专属 SKU 编码、区域锁、经销商协议中的惩罚条款。</p>
+  <p style="color:var(--accent)">运营日常关注：各渠道实际成交价监控 → 异常低价预警。</p>
+</div>
+
+<h2>4. 渠道结算——对账的核心</h2>
+
+<p>不同渠道的结算方式完全不同，这是运营做对账时必须搞清楚的：</p>
+
+<table>
+  <tr><th>渠道</th><th>结算方式</th><th>对账难点</th></tr>
+  <tr><td>官网</td><td>直接收款（支付宝/微信/PayPal）</td><td>支付手续费、退款原路返回</td></tr>
+  <tr><td>京东自营</td><td>京东采购→京东卖给消费者</td><td>采购价 vs 零售价、返利计算</td></tr>
+  <tr><td>天猫旗舰店</td><td>消费者付给天猫→天猫结算给品牌</td><td>佣金扣除、活动补贴</td></tr>
+  <tr><td>Amazon</td><td>FBA / FBM 两种模式</td><td>仓储费、配送费、广告费扣款</td></tr>
+  <tr><td>经销商</td><td>批发合同、账期结算</td><td>信用额度、逾期催收</td></tr>
+</table>
+
+<div class="card">
+  <div class="card-title">🔑 对账核心公式</div>
+  <pre><code>品牌实收 = 渠道销售额 
+         − 平台佣金
+         − 支付手续费
+         − 推广费
+         − 物流费（如 FBA）
+         ± 退款/退货调整</code></pre>
+  <p>运营对账就是逐笔核对这五个减项是否与平台账单一致。</p>
+</div>
+
+<h2>5. 渠道绩效——怎么判断一个渠道好不好</h2>
+
+<table>
+  <tr><th>指标</th><th>公式</th><th>健康值</th></tr>
+  <tr><td>渠道 GMV 占比</td><td>渠道 GMV ÷ 总 GMV</td><td>不过度依赖单一渠道（&lt;50%）</td></tr>
+  <tr><td>渠道毛利率</td><td>(收入−成本−渠道费用) ÷ 收入</td><td>官网 &gt; 平台 &gt; 分销</td></tr>
+  <tr><td>退货率</td><td>退货数 ÷ 销量</td><td>不同品类不同，消费电子 2-5%</td></tr>
+  <tr><td>库存周转</td><td>见 Lesson 0002</td><td>分渠道看，平台通常快于官网</td></tr>
+  <tr><td>ROI</td><td>渠道利润 ÷ 渠道投入</td><td>&gt; 1 即可，&gt; 3 优秀</td></tr>
+</table>
+
+<h2>6. 测验</h2>
+
+<div class="quiz">
+  <h3>🧠 第 1 题</h3>
+  <p>品牌官网毛利率 60%，天猫毛利率 40%，Amazon 毛利率 35%。为什么老板还是不肯砍掉低毛利的平台渠道？</p>
+
+  <a class="quiz-option" href="#q1-a">A. 平台渠道虽然毛利低，但是流量和新客来源</a>
+  <a class="quiz-option" href="#q1-b">B. 老板不懂数据，应该用数据说服他</a>
+  <a class="quiz-option" href="#q1-c">C. 可以砍掉，把预算全投官网推广</a>
+
+  <div id="q1-a" class="quiz-reveal correct">
+    ✅ <strong>正确。</strong>毛利不是唯一指标。平台渠道提供<strong>流量入口、品牌曝光、新客获取</strong>——这些是官网做不到的。很多用户是在 Amazon 搜到品牌 → 下次在官网买。<br>
+    <span style="color:var(--text-muted)">运营思维：看全链路价值，不只盯单一指标。</span>
+  </div>
+  <div id="q1-b" class="quiz-reveal incorrect">
+    ❌ 不是数据问题，是视角问题。只看毛利会忽略渠道的战略价值。
+  </div>
+  <div id="q1-c" class="quiz-reveal incorrect">
+    ❌ 全部投官网推广 = 放弃站外流量。平台的搜索流量无法用广告完全替代。
+  </div>
+</div>
+
+<h2>7. 关键要点</h2>
+
+<table>
+  <tr><th>#</th><th>Takeaway</th></tr>
+  <tr><td>1</td><td>三类渠道：官网（自有）、平台（天猫/京东/Amazon）、分销（经销商）</td></tr>
+  <tr><td>2</td><td>铺货 = 1 个 SKU 在不同渠道生成铺货记录，不是新建 SKU</td></tr>
+  <tr><td>3</td><td>不同渠道结算方式完全不同，对账逐一核对五个减项</td></tr>
+  <tr><td>4</td><td>窜货是渠道管理的核心风险</td></tr>
+  <tr><td>5</td><td>渠道绩效看综合指标，不只盯毛利率</td></tr>
+</table>
+
+<div class="footnote">
+  <p>Lesson 0004 · 电商运营中台知识体系<br>
+  前三课：<a href="0001-spu-sku-category.html">SPU/SKU/类目</a> · <a href="0002-inventory-basics.html">库存基础</a> · <a href="0003-order-lifecycle.html">订单全链路</a></p>
+</div>
+
+<div class="nav">
+  <a href="0003-order-lifecycle.html">← Lesson 0003：订单全链路</a>
+  <a href="0005-sales-kpis.html">下一课：销售核心指标 →</a>
+</div>
+
+</body>
+</html>
