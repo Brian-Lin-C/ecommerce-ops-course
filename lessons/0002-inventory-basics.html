@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0002 — 库存基础：入库、出库、周转、安全库存</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<h1>📊 Lesson 0002：库存——电商的血液</h1>
+
+<blockquote>
+电商有一个残酷公式：<strong>库存 = 现金</strong>。积压的库存是冻结的钱，缺货的库存是流失的钱。<br>
+库存管理就是让这根血管既不堵、也不漏。
+</blockquote>
+
+<h2>1. 回顾：库存绑定在哪个层面？</h2>
+
+<p>从 Lesson 0001 我们知道：</p>
+
+<div class="flow">
+  <div class="flow-box">SPU «Insta360 X5»</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">SKU «黑色 128GB»</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box" style="border-color:var(--accent)">📦 库存数量 = 47 件</div>
+</div>
+
+<p><strong>库存永远绑定在 SKU 层面。</strong>你不可能说「Insta360 X5 库存 100 件」而不指定颜色和容量。</p>
+
+<h2>2. 两种库存视角</h2>
+
+<div class="compare-grid">
+  <div class="compare-col">
+    <h3>🛒 销售库存</h3>
+    <p><strong>前台展示用</strong></p>
+    <p>用户看到：「仅剩 3 件」「库存充足」</p>
+    <p>决定因素：能否下单</p>
+    <p>常见逻辑：</p>
+    <ul>
+      <li>可售库存 = 实物库存 − 已锁定库存</li>
+      <li>超卖保护：显示比实际少</li>
+    </ul>
+  </div>
+  <div class="compare-col">
+    <h3>🏭 仓库库存</h3>
+    <p><strong>后台管理用</strong></p>
+    <p>仓库看到：「A-03-12 货位 47 件」</p>
+    <p>决定因素：实物在哪</p>
+    <p>常见逻辑：</p>
+    <ul>
+      <li>按货位/批次/保质期追踪</li>
+      <li>实物盘点 vs 系统库存对比</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">⚠️ 运营中台常遇到的坑：库存不同步</div>
+  <p>运营跑来问：「为什么系统显示有库存，但仓库说没货？」</p>
+  <p>九成情况是：<strong>销售层和仓库层的库存数据没有实时同步</strong>——可能是某个渠道下单后扣了销售库存，但出库单还没推送到 WMS。</p>
+  <p style="color:var(--accent)">排查思路：先看销售库存 → 再查仓库库存 → 对差异找中间单据（锁定单、调拨单、退货单）。</p>
+</div>
+
+<h2>3. 库存变动的两大方向：入库与出库</h2>
+
+<table>
+  <tr>
+    <th>方向</th>
+    <th>类型</th>
+    <th>场景</th>
+    <th>库存变化</th>
+  </tr>
+  <tr>
+    <td rowspan="4" style="color:var(--success)"><strong>入库 ↑</strong></td>
+    <td>采购入库</td>
+    <td>向供应商采购到货</td>
+    <td style="color:var(--success)">+100</td>
+  </tr>
+  <tr>
+    <td>退货入库</td>
+    <td>用户退货，验货后回仓</td>
+    <td style="color:var(--success)">+1</td>
+  </tr>
+  <tr>
+    <td>调拨入库</td>
+    <td>从仓库 A 调到仓库 B</td>
+    <td style="color:var(--success)">B仓+50</td>
+  </tr>
+  <tr>
+    <td>盘盈入库</td>
+    <td>盘点发现实物比系统多</td>
+    <td style="color:var(--success)">+3</td>
+  </tr>
+  <tr>
+    <td rowspan="4" style="color:var(--accent)"><strong>出库 ↓</strong></td>
+    <td>销售出库</td>
+    <td>用户下单后发货</td>
+    <td style="color:var(--accent)">−1</td>
+  </tr>
+  <tr>
+    <td>采购退货出库</td>
+    <td>退货给供应商</td>
+    <td style="color:var(--accent)">−20</td>
+  </tr>
+  <tr>
+    <td>调拨出库</td>
+    <td>从仓库 A 调到仓库 B</td>
+    <td style="color:var(--accent)">A仓−50</td>
+  </tr>
+  <tr>
+    <td>盘亏出库</td>
+    <td>盘点发现实物比系统少</td>
+    <td style="color:var(--accent)">−2</td>
+  </tr>
+</table>
+
+<div class="card">
+  <div class="card-title">🔑 运营中台的核心工作之一</div>
+  <p>日常运营中，<strong>对账</strong>就是核对每一笔入库/出库在系统间是否一致：</p>
+  <p>「ERP 的采购入库单 = WMS 的实际收货数 ？」<br>
+  「渠道销售出库 = 物流发货数 ？」<br>
+  「退货入库 = 退款金额 ？」</p>
+</div>
+
+<h2>4. 库存周转——衡量库存健康的唯一指标</h2>
+
+<h3>4.1 库存周转率（Inventory Turnover）</h3>
+
+<div class="card">
+  <div class="card-title">📐 公式</div>
+  <pre><code>库存周转率 = 销售成本(COGS) ÷ 平均库存金额
+
+库存周转天数(DOS) = 365 ÷ 库存周转率
+                     = 平均库存金额 ÷ 日均销售成本</code></pre>
+</div>
+
+<div class="example-box">
+<h4>🎬 例子</h4>
+<p>Insta360 X5 黑色 128GB：</p>
+<ul>
+  <li>过去 30 天销售成本（进货价） = ¥300,000</li>
+  <li>日均销售成本 = ¥300,000 ÷ 30 = ¥10,000</li>
+  <li>当前库存金额（按进货价）= ¥150,000</li>
+</ul>
+<p><strong>库存周转天数 = ¥150,000 ÷ ¥10,000 = <span class="highlight">15 天</span></strong></p>
+<p>意思是：按当前销售速度，现有库存 15 天卖完。</p>
+</div>
+
+<h3>4.2 周转天数怎么看？</h3>
+
+<table>
+  <tr>
+    <th>周转天数</th>
+    <th>信号</th>
+    <th>行动</th>
+  </tr>
+  <tr>
+    <td style="color:var(--accent)">&lt; 7 天</td>
+    <td>⚠️ 可能断货</td>
+    <td>紧急补货</td>
+  </tr>
+  <tr>
+    <td style="color:var(--success)">15-45 天</td>
+    <td>✅ 健康</td>
+    <td>正常补货</td>
+  </tr>
+  <tr>
+    <td style="color:var(--warning)">45-90 天</td>
+    <td>⚠️ 偏慢</td>
+    <td>检查是否滞销</td>
+  </tr>
+  <tr>
+    <td style="color:var(--accent)">&gt; 90 天</td>
+    <td>🚨 严重积压</td>
+    <td>清仓/促销/退货给供应商</td>
+  </tr>
+</table>
+
+<p style="color:var(--text-muted)">注意：不同品类标准不同。消费电子产品更新快，周转通常 30-60 天算健康。服装可能更短。家具可以更长。</p>
+
+<h2>5. 安全库存——「万一不够」的保险</h2>
+
+<div class="card">
+  <div class="card-title">📐 安全库存公式（简化版）</div>
+  <pre><code>安全库存 = Z × σ × √L
+
+Z     = 服务水平系数（95%→1.65, 99%→2.33）
+σ     = 需求标准差（日销量的波动程度）
+L     = 补货提前期（从下单到入库的天数）</code></pre>
+  <p style="margin-top:0.8rem; color:var(--text-muted)">实际操作中很多公司用更简单的方式：<strong>安全库存 = 日均销量 × 补货天数 × 1.5</strong></p>
+</div>
+
+<div class="example-box">
+<h4>🎬 例子</h4>
+<p>Insta360 X5 黑色 128GB：</p>
+<ul>
+  <li>日均销量：10 件</li>
+  <li>补货提前期：7 天（供应商交货）</li>
+  <li>需求波动：±30%</li>
+</ul>
+<p><strong>再订货点 = 10 × 7 + 安全库存(10 × 7 × 0.3) = 70 + 21 = 91 件</strong></p>
+<p>当库存降到 91 件时触发补货。补货量 = 目标库存 − 当前库存。</p>
+</div>
+
+<h2>6. 多仓多渠——库存管理的复杂化</h2>
+
+<p>当你有多个仓库、多个渠道时，库存管理变成三维问题：</p>
+
+<div class="flow">
+  <div class="flow-box">SKU</div>
+  <span class="flow-arrow">×</span>
+  <div class="flow-box">仓库</div>
+  <span class="flow-arrow">×</span>
+  <div class="flow-box">库存类型</div>
+</div>
+
+<div class="card">
+  <div class="card-title">🏗️ 库存三层架构（阿里中央库存模型）</div>
+  <table>
+    <tr><th>层级</th><th>管什么</th><th>例子</th></tr>
+    <tr>
+      <td><strong>销售层</strong></td>
+      <td>各渠道可卖多少</td>
+      <td>京东显示「X5 黑色 128GB 可售 15 件」</td>
+    </tr>
+    <tr>
+      <td><strong>调度层</strong></td>
+      <td>订单来了从哪个仓发</td>
+      <td>用户下单 → 系统决定从深圳仓发货</td>
+    </tr>
+    <tr>
+      <td><strong>仓库层</strong></td>
+      <td>实物在哪个货位</td>
+      <td>深圳仓 A-03-12 货位有 47 件</td>
+    </tr>
+  </table>
+</div>
+
+<h2>7. 测验</h2>
+
+<div class="quiz">
+  <h3>🧠 自我检测</h3>
+  <p>某 SKU 过去 30 天卖了 600 件（每件进货成本 ¥50），当前库存 800 件。<br>
+  请问库存周转天数是多少？</p>
+
+  <a class="quiz-option" href="#q2-a">A. 30 天</a>
+  <a class="quiz-option" href="#q2-b">B. 40 天</a>
+  <a class="quiz-option" href="#q2-c">C. 20 天</a>
+  <a class="quiz-option" href="#q2-d">D. 50 天</a>
+
+  <div id="q2-a" class="quiz-reveal incorrect">
+    ❌ 不对。30 天是 600 ÷ 20，但应该用库存金额/日均成本。
+  </div>
+  <div id="q2-b" class="quiz-reveal correct">
+    ✅ <strong>正确！</strong><br>
+    日均销售成本 = 600 × ¥50 ÷ 30 = ¥1,000<br>
+    当前库存金额 = 800 × ¥50 = ¥40,000<br>
+    周转天数 = 40,000 ÷ 1,000 = <strong>40 天</strong>
+  </div>
+  <div id="q2-c" class="quiz-reveal incorrect">
+    ❌ 不对。再算一遍：日均成本是 ¥1,000，库存金额 ¥40,000。
+  </div>
+  <div id="q2-d" class="quiz-reveal incorrect">
+    ❌ 不对。你可能是用数量直接除（800÷20=40），但公式要用金额。
+  </div>
+</div>
+
+<div class="quiz">
+  <h3>🧠 第二题</h3>
+  <p>运营发现「系统显示京东可售 50 件，但 WMS 显示仓库实物只有 30 件」。最可能的原因？</p>
+
+  <a class="quiz-option" href="#q3-a">A. 仓库丢了 20 件货，需要盘点</a>
+  <a class="quiz-option" href="#q3-b">B. 有 20 件已下单但未出库，锁在销售层</a>
+  <a class="quiz-option" href="#q3-c">C. 系统 bug，直接修复数据</a>
+  <a class="quiz-option" href="#q3-d">D. 京东超卖了，需要下架商品</a>
+
+  <div id="q3-a" class="quiz-reveal incorrect">
+    ❌ 可能，但不是第一反应。先查中间状态。
+  </div>
+  <div id="q3-b" class="quiz-reveal correct">
+    ✅ <strong>最可能。</strong>实物 30 + 已锁定 20 = 可售 50。那 20 件的出库单可能卡在 WMS 没执行。<br>
+    <span style="color:var(--text-muted)">运营排查第一步：查锁定库存（待发货、待拣货状态）→ 不是直接怀疑丢货。</span>
+  </div>
+  <div id="q3-c" class="quiz-reveal incorrect">
+    ❌ 别急着修数据。先搞清楚差异原因。
+  </div>
+  <div id="q3-d" class="quiz-reveal incorrect">
+    ❌ 可售 50 是以实物 30 为基础的，说明不是超卖问题。
+  </div>
+</div>
+
+<h2>8. 关键要点</h2>
+
+<table>
+  <tr><th>#</th><th>Takeaway</th></tr>
+  <tr><td>1</td><td>库存绑定在 <strong>SKU × 仓库 × 库存类型</strong> 三维度上</td></tr>
+  <tr><td>2</td><td>销售库存 ≠ 仓库库存：中间隔着锁定/占用/调拨</td></tr>
+  <tr><td>3</td><td>入库 6 种、出库 6 种——对账就是核对每一笔</td></tr>
+  <tr><td>4</td><td>库存周转天数 = 库存金额 ÷ 日均销售成本</td></tr>
+  <tr><td>5</td><td>安全库存是应对需求波动和补货延迟的缓冲</td></tr>
+  <tr><td>6</td><td>排查库存差异：先查中间状态（锁定/在途/待拣），别直接怀疑丢货</td></tr>
+</table>
+
+<h2>9. 延伸阅读</h2>
+<ul>
+  <li><a href="https://www.woshipm.com/pd/678986.html" target="_blank">人人都是产品经理：电商后台之库存管理</a> — 货位/调拨/盘点的实操</li>
+  <li><a href="https://cloud.tencent.cn/developer/article/2238920" target="_blank">vivo 商城库存系统架构设计</a> — 真实大厂库存中心的演进</li>
+  <li><a href="https://www.eshutong.com/archives/5691.html" target="_blank">帆软：库存周转天数 DOS 计算</a> — 不同口径的细节</li>
+</ul>
+
+<div class="footnote">
+  <p>Lesson 0002 · 电商运营中台知识体系<br>
+  ← <a href="0001-spu-sku-category.html">上一课：SPU/SKU/类目</a><br>
+  有任何疑问随时在对话中问我。</p>
+</div>
+
+<div class="nav">
+  <a href="0001-spu-sku-category.html">← Lesson 0001：SPU/SKU/类目</a>
+  <a href="0003-order-lifecycle.html">下一课：订单全链路 →</a>
+</div>
+
+</body>
+</html>
