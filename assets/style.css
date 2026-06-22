@@ -1,0 +1,235 @@
+/* Shared stylesheet for e-commerce operations course */
+/* Dark theme, Tufte-inspired typography */
+
+:root {
+  --bg: #1a1a2e;
+  --bg-card: #16213e;
+  --bg-accent: #0f3460;
+  --text: #e0e0e0;
+  --text-muted: #a0a0b0;
+  --accent: #e94560;
+  --accent-2: #53a8b6;
+  --border: #2a2a4a;
+  --success: #4ecca3;
+  --warning: #f0a500;
+  --code-bg: #0d1117;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Georgia', 'Noto Serif SC', serif;
+  line-height: 1.8;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+h1 {
+  font-size: 2rem;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 1.4rem;
+  color: var(--accent-2);
+  margin: 2.5rem 0 1rem;
+}
+
+h3 {
+  font-size: 1.1rem;
+  color: var(--text);
+  margin: 1.5rem 0 0.8rem;
+}
+
+p { margin: 0.8rem 0; }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.card-title {
+  font-size: 1rem;
+  color: var(--accent-2);
+  margin-bottom: 0.8rem;
+  font-weight: bold;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+th, td {
+  padding: 0.8rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  background: var(--bg-accent);
+  color: var(--accent-2);
+  font-weight: normal;
+}
+
+tr:hover { background: rgba(233, 69, 96, 0.05); }
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.compare-col {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.2rem;
+}
+
+.compare-col h3 { margin-top: 0; }
+
+.quiz {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+}
+
+.quiz h3 { margin-top: 0; color: var(--warning); }
+
+.quiz-option {
+  display: block;
+  padding: 0.7rem 1rem;
+  margin: 0.5rem 0;
+  background: #2a2a4a;
+  border: 1px solid #555577;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #d0d0e0;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.quiz-option:hover { background: #3a3a5e; border-color: var(--accent-2); color: #ffffff; }
+
+.quiz-reveal {
+  display: none;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 4px;
+  color: #d0d0e0;
+}
+
+.quiz-reveal:target { display: block; }
+
+.correct { background: rgba(78, 204, 163, 0.2); border: 1px solid var(--success); }
+.incorrect { background: rgba(233, 69, 96, 0.2); border: 1px solid var(--accent); }
+
+code {
+  background: var(--code-bg);
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: 'Fira Code', 'Consolas', monospace;
+}
+
+pre {
+  background: var(--code-bg);
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+pre code { padding: 0; background: none; }
+
+blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 0.5rem 1rem;
+  margin: 1rem 0;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+a { color: #6ec6d8; }
+a:visited { color: #8b7fcf; }
+a:hover { color: #ffffff; }
+
+.footnote {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.footnote a { color: #6ec6d8; }
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.nav a { color: var(--accent-2); text-decoration: none; }
+.nav a:hover { text-decoration: underline; }
+
+.tag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  background: var(--bg-accent);
+  color: var(--accent-2);
+  margin-right: 0.3rem;
+}
+
+.highlight { color: var(--accent); font-weight: bold; }
+
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.flow-box {
+  background: var(--bg-accent);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem 0.8rem;
+  white-space: nowrap;
+}
+
+.flow-arrow { color: var(--accent); font-size: 1.2rem; }
+
+.example-box {
+  background: var(--bg-card);
+  border-left: 3px solid var(--accent-2);
+  padding: 1rem 1.2rem;
+  margin: 1rem 0;
+  border-radius: 0 6px 6px 0;
+}
+
+.example-box h4 {
+  color: var(--accent-2);
+  margin-bottom: 0.5rem;
+}
