@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0006 — 数据看板与对账自动化</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<h1>📊 Lesson 0006：数据看板与对账自动化</h1>
+
+<blockquote>
+前五课讲懂了电商的「业务实体」和「运转逻辑」。这一课讲运营日常工作的<strong>两个核心工具</strong>：<br>
+看板——让你一眼看清业务健康度；对账——确保钱和货都对得上。
+</blockquote>
+
+<h2>1. 运营看板——你的驾驶舱</h2>
+
+<p>电商运营看板的本质：<strong>把五大实体的关键指标放在一个页面上，一眼判断哪里出问题</strong>。</p>
+
+<h3>1.1 标准看板结构</h3>
+
+<table>
+  <tr><th>模块</th><th>核心图表</th><th>更新频率</th></tr>
+  <tr>
+    <td><strong>销售概览</strong></td>
+    <td>GMV 趋势线、实收、环比/同比</td>
+    <td>每日</td>
+  </tr>
+  <tr>
+    <td><strong>渠道拆解</strong></td>
+    <td>各渠道 GMV 占比饼图、毛利率对比</td>
+    <td>每日</td>
+  </tr>
+  <tr>
+    <td><strong>商品分析</strong></td>
+    <td>Top 10 SKU 销售排行、动销率、滞销品</td>
+    <td>每周</td>
+  </tr>
+  <tr>
+    <td><strong>库存健康</strong></td>
+    <td>库存周转天数、缺货预警、积压预警</td>
+    <td>每日</td>
+  </tr>
+  <tr>
+    <td><strong>订单漏斗</strong></td>
+    <td>下单→支付→发货转化率</td>
+    <td>每日</td>
+  </tr>
+  <tr>
+    <td><strong>售后监控</strong></td>
+    <td>退货率趋势、退款原因分布</td>
+    <td>每周</td>
+  </tr>
+</table>
+
+<h3>1.2 看板设计的黄金法则</h3>
+
+<div class="flow">
+  <div class="flow-box">总览</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">下钻</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">明细</div>
+</div>
+
+<div class="example-box">
+<h4>🎬 从看板到行动的路径</h4>
+<p><strong>总览层：</strong>GMV 环比 −15% 🔴<br>
+<strong>↓ 下钻到渠道：</strong>Amazon 降 30%，天猫涨 5% → 定位 Amazon<br>
+<strong>↓ 下钻到商品：</strong>X5 降 40%，配件涨 10% → 定位 X5<br>
+<strong>↓ 下钻到因子：</strong>流量不变，CVR 掉 → 看评价/价格<br>
+<strong>↓ 看明细：</strong>最近 3 条 1 星差评 → 找到根因<br>
+→ <strong>行动：</strong>联系用户 + 更新详情页</p>
+</div>
+
+<h3>1.3 运营常用 SQL 模板</h3>
+
+<div class="card">
+  <div class="card-title">💻 每日 GMV 看板查询</div>
+  <pre><code>-- 按渠道的日 GMV 和订单数
+SELECT 
+    channel,
+    DATE(order_time) as dt,
+    COUNT(DISTINCT order_id) as orders,
+    SUM(actual_amount) as gmv,
+    SUM(actual_amount) / COUNT(DISTINCT order_id) as asp
+FROM orders
+WHERE order_status NOT IN ('cancelled', 'refunded')
+  AND DATE(order_time) = CURDATE()
+GROUP BY channel, DATE(order_time);</code></pre>
+</div>
+
+<div class="card">
+  <div class="card-title">💻 库存预警查询</div>
+  <pre><code>-- 周转天数 > 60 的滞销 SKU
+WITH daily_sales AS (
+    SELECT sku_id, 
+           SUM(qty) / 30 as avg_daily_sales
+    FROM order_items 
+    WHERE order_time >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    GROUP BY sku_id
+)
+SELECT i.sku_id, i.stock_qty,
+       ROUND(i.stock_qty / s.avg_daily_sales, 1) as dos,
+       CASE 
+           WHEN i.stock_qty / s.avg_daily_sales > 90 THEN '严重积压'
+           WHEN i.stock_qty / s.avg_daily_sales > 60 THEN '偏慢'
+           WHEN i.stock_qty / s.avg_daily_sales < 7  THEN '断货风险'
+           ELSE '健康'
+       END as status
+FROM inventory i
+JOIN daily_sales s ON i.sku_id = s.sku_id
+ORDER BY dos DESC;</code></pre>
+</div>
+
+<h2>2. 对账自动化——运营的「守护神」</h2>
+
+<h3>2.1 电商对账的三个核心核对</h3>
+
+<table>
+  <tr><th>对账类型</th><th>核对什么</th><th>通常差异在哪</th></tr>
+  <tr>
+    <td><strong>订单-库存对账</strong></td>
+    <td>OMS 扣减数 vs WMS 出库数</td>
+    <td>未及时同步、锁定状态不一致</td>
+  </tr>
+  <tr>
+    <td><strong>订单-财务对账</strong></td>
+    <td>OMS 金额 vs 支付平台流水</td>
+    <td>退款、手续费、汇率差异</td>
+  </tr>
+  <tr>
+    <td><strong>渠道-内部对账</strong></td>
+    <td>平台账单 vs 内部销售报表</td>
+    <td>佣金计算、活动补贴、退货扣款</td>
+  </tr>
+</table>
+
+<h3>2.2 对账工作流</h3>
+
+<div class="flow" style="font-size:0.85rem;">
+  <div class="flow-box">1. 数据拉取</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">2. 格式统一</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">3. 自动匹配</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">4. 差异标记</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box">5. 人工复核</div>
+</div>
+
+<div class="card">
+  <div class="card-title">🤖 用 AI 做对账——Python 伪代码</div>
+  <pre><code># AI 辅助对账：自动标记差异 + 生成解释
+import pandas as pd
+
+# 1. 拉取两边数据
+oms = pd.read_sql("SELECT order_id, amount FROM oms_orders", conn)
+payment = pd.read_csv("alipay_settlement.csv")
+
+# 2. 按订单号匹配
+merged = oms.merge(payment, on='order_id', how='outer', 
+                    suffixes=('_oms', '_pay'))
+
+# 3. 计算差异
+merged['diff'] = merged['amount_oms'] - merged['amount_pay']
+
+# 4. 标记异常 (差异 > 1 元)
+anomalies = merged[abs(merged['diff']) > 1]
+
+# 5. 用 AI 生成差异分析
+for _, row in anomalies.iterrows():
+    prompt = f"""
+    订单 {row['order_id']}:
+    OMS金额: {row['amount_oms']}
+    支付金额: {row['amount_pay']}
+    差异: {row['diff']}
+    请分析可能原因（退款、手续费、汇率、促销折扣）
+    """
+    # → 调用 Claude/DeepSeek API
+</code></pre>
+</div>
+
+<h2>3. 数据异常排查——运营的硬功夫</h2>
+
+<div class="card">
+  <div class="card-title">🔍 通用排查框架</div>
+  <table>
+    <tr><th>步骤</th><th>动作</th><th>工具</th></tr>
+    <tr><td>1. 确认问题</td><td>什么指标？什么时间范围？谁发现的？</td><td>看板</td></tr>
+    <tr><td>2. 缩小范围</td><td>哪个渠道？哪个 SKU？哪个订单？</td><td>下钻查询</td></tr>
+    <tr><td>3. 找对比</td><td>和昨天/上周/去年同期比，差异在哪个环节？</td><td>SQL / Excel</td></tr>
+    <tr><td>4. 查日志</td><td>系统日志看有没有报错、超时、数据同步延迟</td><td>系统后台</td></tr>
+    <tr><td>5. 验证假设</td><td>拉明细数据验证</td><td>SQL</td></tr>
+    <tr><td>6. 闭环</td><td>修复 + 写复盘文档 + 加监控规则</td><td>文档</td></tr>
+  </table>
+</div>
+
+<h2>4. 测验</h2>
+
+<div class="quiz">
+  <h3>🧠 场景题</h3>
+  <p>早上一眼看板：GMV 正常，但「已发货」订单数比昨天同时段少了 40%。你的排查顺序？</p>
+
+  <a class="quiz-option" href="#q1-a">A. 先查仓库是否出问题 → 再查支付成功率 → 最后查订单状态</a>
+  <a class="quiz-option" href="#q1-b">B. 先查支付成功率 → 再查 WMS 出库速度 → 最后查物流</a>
+  <a class="quiz-option" href="#q1-c">C. 先查订单状态分布 → 定位卡在哪一步 → 再查对应系统</a>
+
+  <div id="q1-a" class="quiz-reveal incorrect">
+    ❌ 可能猜对了方向，但应该是先看数据再下手查系统。
+  </div>
+  <div id="q1-b" class="quiz-reveal incorrect">
+    ❌ 先假设了是支付或仓库问题，但还没看数据分布。
+  </div>
+  <div id="q1-c" class="quiz-reveal correct">
+    ✅ <strong>正确！</strong>先拉订单状态分布：待支付多少？已支付待发货多少？已发货多少？<br>
+    如果「已支付待发货」暴涨 → WMS 出库慢<br>
+    如果「待支付」暴涨 → 支付环节问题<br>
+    如果「已发货」确实少了但 GMV 正常 → 可能是大促后的正常波动<br>
+    <strong>原则：先看数据分布，再定位系统。</strong>
+  </div>
+</div>
+
+<h2>5. 关键要点</h2>
+
+<table>
+  <tr><th>#</th><th>Takeaway</th></tr>
+  <tr><td>1</td><td>看板设计：总览 → 下钻 → 明细，三层递进</td></tr>
+  <tr><td>2</td><td>对账三核：订单-库存、订单-财务、渠道-内部</td></tr>
+  <tr><td>3</td><td>SQL 是运营的基本功——GMV、库存预警、差异查询</td></tr>
+  <tr><td>4</td><td>AI 辅助对账：自动匹配 + 差异标记 + AI 生成解释</td></tr>
+  <tr><td>5</td><td>排查框架：确认问题 → 缩小范围 → 找对比 → 查日志 → 验证 → 闭环</td></tr>
+</table>
+
+<div class="footnote">
+  <p>Lesson 0006 · 电商运营中台知识体系<br>
+  前面：<a href="0005-sales-kpis.html">销售核心指标</a><br>
+  有任何疑问随时在对话中问我。</p>
+</div>
+
+<div class="nav">
+  <a href="0005-sales-kpis.html">← Lesson 0005：销售核心指标</a>
+  <a href="0007-ai-agent-ops.html">下一课：AI Agent 重构电商运营 →</a>
+</div>
+
+</body>
+</html>
